@@ -25,10 +25,29 @@ func main() {
 			os.Exit(1)
 		}
 	}
+
+	authUser := os.Getenv("AUTH_USER")
+	authPass := os.Getenv("AUTH_PASS")
+	if authUser != "" && authPass == "" {
+		fmt.Fprintf(os.Stderr, "AUTH_USER specified, but no AUTH_PASS was provided. Bailing out.\n")
+		os.Exit(1)
+	}
+
+	if authUser == "" && authPass != "" {
+		fmt.Fprintf(os.Stderr, "AUTH_PASS specified, but no AUTH_USER was provided. Bailing out.\n")
+		os.Exit(1)
+	}
+
 	go lockServer(lockChan, lockConfig)
 
 	router := gin.Default()
-	router.GET("/locks", func(c *gin.Context) {
+	var routes *gin.RouterGroup
+	if authUser != "" && authPass != "" {
+		routes = router.Group("/", gin.BasicAuth(gin.Accounts{authUser: authPass}))
+	} else {
+		routes = router.Group("/", func(c *gin.Context) {})
+	}
+	routes.GET("/locks", func(c *gin.Context) {
 		rc := make(chan LockResponse)
 
 		lr := LockRequest{
@@ -47,7 +66,7 @@ func main() {
 
 		c.Render(200, render.JSON{Data: response.Message})
 	})
-	router.PUT("/lock/:pool", func(c *gin.Context) {
+	routes.PUT("/lock/:pool", func(c *gin.Context) {
 		rc := make(chan LockResponse)
 
 		pool := c.Param("pool")
@@ -79,7 +98,7 @@ func main() {
 			c.Render(500, render.JSON{Data: map[string]string{"error": "Unknown response from lock request"}})
 		}
 	})
-	router.DELETE("/lock/:pool", func(c *gin.Context) {
+	routes.DELETE("/lock/:pool", func(c *gin.Context) {
 		rc := make(chan LockResponse)
 		pool := c.Param("pool")
 		input := LockInput{}

@@ -24,6 +24,8 @@ FIXME: Coming soon
 
 # locker API
 
+## Supported Requests
+
 * `GET /locks`
 
   Returns a JSON formatted list of locks + who owns them currently
@@ -59,3 +61,33 @@ FIXME: Coming soon
   ```
   curl -X DELETE -d '{"lock":"prod-cloudfoundry"}' http://locker-ip:port/lock/prod-deployments
   ```
+
+## Authentication
+
+`locker` is protected with HTTP basic authentication. Credentials are passed in 
+
+## Error handling
+
+Errors will be reported as json objects, inside a top-level `error` key:
+
+```
+{"error":"This is what went wrong"}
+```
+
+## Running manually
+
+If you want to run `locker` manually for testing/development:
+
+```
+go build
+LOCKER_CONFIG=/tmp/locker-data.yml ./locker
+```
+
+`locker` can be configured using the following environment variables:
+
+* `LOCKER_CONFIG` **required** - specifies the file that locks will be stored in
+* `PORT` - Defaults to 3000, controls the port `locker` listens on
+* `AUTH_USER` - If specified, requires `AUTH_PASS` and configures the username for
+  HTTP basic auth
+* `AUTH_PASS` - If specified, requires `AUTH_USER` and configures the password for
+  HTTP basic auth
