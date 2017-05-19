@@ -20,3 +20,42 @@ This project is similar to the [pool-resource], with a few key differences:
 # locker-resource
 
 FIXME: Coming soon
+
+
+# locker API
+
+* `GET /locks`
+
+  Returns a JSON formatted list of locks + who owns them currently
+
+* `PUT /lock/<pool-name>`
+
+  Content: `{"lock":"item-requesting-the-lock"}`
+
+  Issues a lock on `pool-name` to the value of the `lock` attribute in the JSON payload of the request.
+  If the lock was already taken, it will immediately return a 423 error, and the client should back-off +
+  re-try at a sane interval until the lock is obtained.
+
+  Returns 200 on success, 423 on locking failure
+
+  Example to lock `prod-deployments` with `prod-cloudfoundry`:
+
+  ```
+  curl -X PUT -d '{"lock":"prod-cloudfoundry"}' http://locker-ip:port/lock/prod-deployments
+  ```
+
+* `DELETE /lock/<pool-name>`
+
+  Content: `{"lock":"item-requesting-unlock"}`
+
+  Issues an unlock request on `pool-name` based on the value of the `lock` attribute in the JSON payload
+  of the request. If the lock on `pool-name` is not currently held by `item-requesting-unlock`, the
+  unlock is disallowed. If the lock is currently not held by anyone, returns 200.
+
+  Returns 200 on success, 423 on failure.
+
+  Example to unlock `prod-deployments` previously locked by `prod-cloudfoundry`:
+
+  ```
+  curl -X DELETE -d '{"lock":"prod-cloudfoundry"}' http://locker-ip:port/lock/prod-deployments
+  ```
