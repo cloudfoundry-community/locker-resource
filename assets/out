@@ -1,0 +1,55 @@
+#!/bin/bash
+
+set -e
+
+exec 3>&1
+exec 1>&2
+
+src=$1
+
+source $(dirname $0)/common.sh
+
+if [[ -z "$lock" ]]; then
+	echo >&2 "invalid payload (missing lock_with)"
+fi
+
+if [[ "$operation" == "lock" ]]; then
+	OP=PUT
+elif [[ "$operation" == "unlock" ]]; then
+	OP=DELETE
+else
+	echo >&2 "invalid payload (unrecognized lock_op '$operation' - should be 'lock' or 'unlock)"
+	exit 1
+fi
+
+set +e
+out=$(http_req /lock/${pool} -X $OP -d "{\"lock\":\"${lock}\"}")
+rc=$?
+set -e
+
+if [[ ${operation} == "lock" ]]; then
+	while echo "$out" | grep -q "423 Locked"; do
+		echo "$pool" is locked, trying again in 30s
+		sleep 30
+		set +e
+		out=$(http_req /lock/${pool} -X $OP -d "{\"lock\":\"${lock}\"}")
+		rc=$?
+		set -e
+	done
+fi
+
+if [[ $rc != 0 ]]; then
+	echo >&2 "Failed to communicate with locker:"
+	echo >&2 "$out"
+	exit 1
+fi
+
+echo "$out"
+
+current_ref=$(calc_reference)
+
+echo "$out" | jq "{\"version\": {\"ref\": \"$current_ref\"}, \"metadata\":
+  [{\"name\":\"sha1\", \"value\":\"$current_ref\"},
+   {\"name\":\"pool\",\"value\":\"$pool\"},
+   {\"name\":\"status\",\"value\":. | tojson}
+   ]}" >&3

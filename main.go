@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/render"
@@ -43,7 +45,7 @@ func main() {
 	router := gin.Default()
 	var routes *gin.RouterGroup
 	if authUser != "" && authPass != "" {
-		routes = router.Group("/", gin.BasicAuth(gin.Accounts{authUser: authPass}))
+		routes = router.Group("/", AuthHandler(authUser, authPass))
 	} else {
 		routes = router.Group("/", func(c *gin.Context) {})
 	}
@@ -137,4 +139,35 @@ func main() {
 		port = "3000"
 	}
 	router.Run(":" + port)
+}
+
+func AuthHandler(user, password string) gin.HandlerFunc {
+	realm := "Basic realm=\"Authorization Required\""
+	return func(c *gin.Context) {
+		hdr := c.Request.Header.Get("Authorization")
+		fields := strings.SplitN(hdr, " ", 2)
+		if strings.ToLower(fields[0]) != "basic" {
+			fmt.Fprintf(os.Stderr, "Got illegal authentication request type: %s\n", fields[0])
+			c.Header("WWW-Authenticate", realm)
+			c.Render(401, render.JSON{Data: map[string]string{"error": "Please Authenticate"}})
+			c.Abort()
+			return
+		}
+
+		auth, err := base64.StdEncoding.DecodeString(fields[1])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to decode authorization header '%s': %s", fields[1], err)
+			c.Header("WWW-Authenticate", realm)
+			c.Render(401, render.JSON{Data: map[string]string{"error": "Please Authenticate"}})
+			c.Abort()
+			return
+		}
+		creds := strings.SplitN(string(auth), ":", 2)
+		if user != creds[0] || password != creds[1] {
+			c.Header("WWW-Authenticate", realm)
+			c.Render(401, render.JSON{Data: map[string]string{"error": "Please Authenticate"}})
+			c.Abort()
+			return
+		}
+	}
 }

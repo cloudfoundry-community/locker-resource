@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# vim: set ft=sh
+
+set -e
+set -o pipefail
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+destination=$1
+mkdir -p "${destination}"
+
+source $(dirname $0)/common.sh
+
+if [ -z "$destination" ]; then
+  echo "usage: $0 <path/to/destination>" >&2
+  exit 1
+fi
+
+last_ref=$(jq -r '.version.ref // ""' < $payload)
+echo $last_ref > $destination/version
+
+set +e
+locks=$(http_req /locks)
+failed=$?
+set -e
+if [[ $failed != 0 ]]; then
+	echo >&2 Failed to talk to locker:
+	echo "${locks}"
+	exit 1
+fi
+current=$(jq -r ".[\"$pool\"]" << EOF
+${locks}
+EOF
+)
+
+if [[ -n ${current} ]]; then
+  locked="true"
+else
+  locked="false"
+fi
+
+echo "$current" > ${destination}/lock
+
+jq -n "{
+  \"version\": {\"ref\": \"$last_ref\"},
+  \"metadata\": [{\"name\": \"sha1\", \"value\": \"$last_ref\"},{\"pool\":\"$pool\"},{\"locked\":$locked}]
+}" >&3
