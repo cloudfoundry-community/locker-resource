@@ -19,8 +19,37 @@ This project is similar to the [pool-resource], with a few key differences:
 
 # locker-resource
 
-FIXME: Coming soon
+## Source Configuration
 
+* `locker_uri` - specifies the base URI of the locker API
+* `username` - specifies the username to use when authenticating to the locker API
+* `password` - specifies the password to use when authenticating to the locker API
+* `ca_cert` - specifies a PEM-encoded CA certificate for validating
+  SSL while communicating with the locker API
+* `skip_ssl_validation` - determines if ssl validation is ignored while
+  communicating with the locker API
+* `lock_pool` **required** - specifies the name of the lock pool to use
+
+## `in` - Get status of a Pool
+
+Retrieves the current status of the lock pool, creates a
+`lock` file with the name of who owns the lock currently.
+If no one owns the lock, the file will be empty.
+
+### Configuration
+
+None.
+
+## `out` - Lock/Unlock a Pool
+
+Allows you to lock or unlock a pool. If the pool is currently locked,
+even by the item requesting the lock, it will loop indefinitely, until
+the lock is released. Unlocking is only allowed when the `lock_with` matches
+the item that had claimed the lock initially.
+
+* `lock_with` **required** - specifies the name of the item that is attempting to claim
+  the lock. 
+* `lock_op` **required** - specifies whehter you want to `lock` or `unlock` the pool
 
 # locker API
 

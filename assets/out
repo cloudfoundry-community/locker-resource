@@ -49,7 +49,7 @@ echo "$out"
 current_ref=$(calc_reference)
 
 echo "$out" | jq "{\"version\": {\"ref\": \"$current_ref\"}, \"metadata\":
-  [{\"name\":\"sha1\", \"value\":\"$current_ref\"},
+  [
    {\"name\":\"pool\",\"value\":\"$pool\"},
    {\"name\":\"status\",\"value\":. | tojson}
-   ]}" >&3
+  }" >&3
