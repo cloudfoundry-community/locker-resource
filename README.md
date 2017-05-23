@@ -4,7 +4,7 @@ Locker is a simple web application for claiming and releasing locks.
 It contains a Concourse resource to help make locking various tasks
 and jobs in Concourse pipelines easier to manage.
 
-This project is similar to the [pool-resource], with a few key differences:
+This project is similar to the [pool-resource](https://github.com/concourse/pool-resource), with a few key differences:
 
 1) It uses a webserver with file-backed persistence for the locks. This isn't
    terribly scalable, but since it's handling locks for Concourse pipelines,
@@ -13,9 +13,9 @@ This project is similar to the [pool-resource], with a few key differences:
 
 # How do I use it?
 
-1) Deploy `locker` along side your Concourse database node via the [locker-boshrelease]
-2) Use the `locker-resource` in your Concourse pipelines (see below for an example pipeline
-   + details on configuring the resource)
+1) Deploy `locker` along side your Concourse database node via the [locker-boshrelease](https://github.com/cloudfoundry-community/locker-boshrelease)
+2) Use the `locker-resource` in your Concourse pipelines (see below for resource
+   configuration details).
 
 # locker-resource
 
