@@ -52,4 +52,4 @@ echo "$out" | jq "{\"version\": {\"ref\": \"$current_ref\"}, \"metadata\":
   [
    {\"name\":\"pool\",\"value\":\"$pool\"},
    {\"name\":\"status\",\"value\":. | tojson}
-  }" >&3
+  ]}" >&3
