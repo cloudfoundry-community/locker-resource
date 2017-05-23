@@ -41,7 +41,7 @@ if [[ -n $username && -n $password ]]; then
 fi
 
 calc_reference() {
-  http_req /locks | shasum | cut -d " " -f1
+  http_req /locks | sha1sum | cut -d " " -f1
 }
 
 http_req() {
