@@ -15,13 +15,13 @@ operation="$(jq -r '.params.lock_op // ""' < $payload)"
 if [[ -z "$uri" ]]; then
   echo >&2 "invalid payload (missing locker_uri):"
   cat $payload >&2
-  exit 99
+  exit 1
 fi
 
 if [[ -z "${pool}" ]]; then
   echo >&2 "invalid payload (missing lock_pool)"
   cat $payload >&2
-  exit 99
+  exit 1
 fi
 
 if [[ -n ${ca_cert} ]]; then
