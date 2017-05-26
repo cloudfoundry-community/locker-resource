@@ -29,7 +29,7 @@ if [[ $failed != 0 ]]; then
 	echo "${locks}"
 	exit 1
 fi
-current=$(jq -r ".[\"$pool\"]" << EOF
+current=$(jq -r ".[\"$lock\"]" << EOF
 ${locks}
 EOF
 )
@@ -44,5 +44,5 @@ echo "$current" > ${destination}/lock
 
 jq -n "{
   \"version\": {\"ref\": \"$last_ref\"},
-  \"metadata\": [{\"pool\":\"$pool\"},{\"locked\":$locked}]
+  \"metadata\": [{\"lock\":\"$lock\"},{\"locked\":$locked}]
 }" >&3

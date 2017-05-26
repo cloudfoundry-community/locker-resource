@@ -8,8 +8,9 @@ password=$(jq -r '.source.password // ""' < $payload)
 ca_cert=$(jq -r '.source.ca_cert // ""' < $payload)
 skip_ssl_validation=$(jq -r '.source.skip_ssl_validation // ""' < $payload)
 
-pool="$(jq -r '.source.lock_pool // ""' < $payload)"
-lock="$(jq -r '.params.lock_with // ""' < $payload)"
+lock="$(jq -r '.source.lock_name // ""' < $payload)"
+key="$(jq -r '.params.key // ""' < $payload)"
+locked_by="$(jq -r '.params.locked_by // ""' < $payload)"
 operation="$(jq -r '.params.lock_op // ""' < $payload)"
 
 if [[ -z "$uri" ]]; then
@@ -18,8 +19,8 @@ if [[ -z "$uri" ]]; then
   exit 1
 fi
 
-if [[ -z "${pool}" ]]; then
-  echo >&2 "invalid payload (missing lock_pool)"
+if [[ -z "${lock}" ]]; then
+  echo >&2 "invalid payload (missing lock_name)"
   cat $payload >&2
   exit 1
 fi

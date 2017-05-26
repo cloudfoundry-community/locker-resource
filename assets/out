@@ -10,7 +10,7 @@ src=$1
 source $(dirname $0)/common.sh
 
 if [[ -z "$lock" ]]; then
-	echo >&2 "invalid payload (missing lock_with)"
+	echo >&2 "invalid payload (missing key)"
 fi
 
 if [[ "$operation" == "lock" ]]; then
@@ -22,17 +22,23 @@ else
 	exit 1
 fi
 
+payload="{\"key\":\"${key}\"}"
+if [[ -n "$locked_by" ]]; then
+	payload="{\"key\":\"${key}\",\"locked_by\":\"${locked_by}\"}"
+fi
+
+
 set +e
-out=$(http_req /lock/${pool} -X $OP -d "{\"lock\":\"${lock}\"}")
+out=$(http_req /lock/${lock} -X $OP -d "${payload}"
 rc=$?
 set -e
 
 if [[ ${operation} == "lock" ]]; then
 	while echo "$out" | grep -q "423 Locked"; do
-		echo "$pool" is locked, trying again in 30s
+		echo "$lock" is locked, trying again in 30s
 		sleep 30
 		set +e
-		out=$(http_req /lock/${pool} -X $OP -d "{\"lock\":\"${lock}\"}")
+		out=$(http_req /lock/${lock} -X $OP -d "${payload}")
 		rc=$?
 		set -e
 	done
@@ -50,6 +56,6 @@ current_ref=$(calc_reference)
 
 echo "$out" | jq "{\"version\": {\"ref\": \"$current_ref\"}, \"metadata\":
   [
-   {\"name\":\"pool\",\"value\":\"$pool\"},
+   {\"name\":\"lock\",\"value\":\"$lock\"},
    {\"name\":\"status\",\"value\":. | tojson}
   ]}" >&3
