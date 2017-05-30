@@ -56,8 +56,9 @@ the key that has currently locked the lock.
 ### Example of exclusive locking between two jobs
 
 ```
-resource:
+resources:
 - name: myLock
+  type: locker
   source:
     locker_uri: http://10.10.10.10:8910
     username: test
@@ -98,8 +99,9 @@ jobs:
 ### Example of shared locking between some jobs that cannot co-exist with another
 
 ```
-resource:
+resources:
 - name: myLock
+  type: locker
   source:
     locker_uri: http://10.10.10.10:8910
     username: test
