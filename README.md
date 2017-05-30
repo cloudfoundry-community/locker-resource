@@ -92,7 +92,7 @@ jobs:
     .....
   - put: myLock
     params:
-      key: exclusive-job-1
+      key: exclusive-job-2
       lock_op: unlock
 ```
 
