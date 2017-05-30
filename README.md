@@ -78,7 +78,7 @@ jobs:
   - put: myLock
     params:
       key: exclusive-job-1
-     lock_op: unlock
+      lock_op: unlock
 - name: exclusive-job-2
   public: true
   serial: true
@@ -92,7 +92,7 @@ jobs:
   - put: myLock
     params:
       key: exclusive-job-1
-     lock_op: unlock
+      lock_op: unlock
 ```
 
 ### Example of shared locking between some jobs that cannot co-exist with another
