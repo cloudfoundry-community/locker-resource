@@ -29,7 +29,7 @@ fi
 
 
 set +e
-out=$(http_req /lock/${lock} -X $OP -d "${payload}"
+out=$(http_req /lock/${lock} -X $OP -d "${payload}")
 rc=$?
 set -e
 
