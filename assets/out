@@ -24,7 +24,7 @@ fi
 
 payload="{\"key\":\"${key}\"}"
 if [[ -n "$locked_by" ]]; then
-	payload="{\"key\":\"${key}\",\"locked_by\":\"${locked_by}\"}"
+	payload="{\"key\":\"${key}\",\"requestor\":\"${locked_by}\"}"
 fi
 
 
