@@ -11,8 +11,8 @@ source $(dirname $0)/common.sh
 
 if [[ -z "${lock}" ]]; then
 	echo "Determining lock name based off of BOSH info: ${bosh_lock}/info"
-	lock=$(curl -k ${bosh_lock}/info | jq -r '.name')
-	echo "Using ${lock} for lock name"
+	lock=$(curl -k ${bosh_lock}/info | jq -r '.name' | perl -p -e 'chomp; s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;')
+	echo "Using '${lock}' for lock name"
 fi
 
 if [[ -z "$key" ]]; then
@@ -35,7 +35,7 @@ fi
 
 
 set +e
-out=$(http_req /lock/${lock} -X $OP -d "${payload}")
+out=$(http_req "/lock/${lock}" -X $OP -d "${payload}")
 rc=$?
 set -e
 
@@ -44,7 +44,7 @@ if [[ ${operation} == "lock" ]]; then
 		echo "$lock" is locked, trying again in 30s
 		sleep 30
 		set +e
-		out=$(http_req /lock/${lock} -X $OP -d "${payload}")
+		out=$(http_req "/lock/${lock}" -X $OP -d "${payload}")
 		rc=$?
 		set -e
 	done
