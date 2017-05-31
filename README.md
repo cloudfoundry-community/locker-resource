@@ -28,7 +28,10 @@ This project is similar to the [pool-resource](https://github.com/concourse/pool
   SSL while communicating with the locker API
 * `skip_ssl_validation` - determines if ssl validation is ignored while
   communicating with the locker API
-* `lock_name` **required** - specifies the name of the lock to be acquired
+* `lock_name` - specifies the name of the lock to be acquired **(either this or `bosh_lock` must be specified)**
+* `bosh_lock` - a base URL to a BOSH director. locker-resource will lookup the director's name, and use that
+  as the lock name **(either this or `bosh_lock` must be specified)**
+
 
 ## `in` - Get status of a Pool
 

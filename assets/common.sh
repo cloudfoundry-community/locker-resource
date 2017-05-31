@@ -9,6 +9,7 @@ ca_cert=$(jq -r '.source.ca_cert // ""' < $payload)
 skip_ssl_validation=$(jq -r '.source.skip_ssl_validation // ""' < $payload)
 
 lock="$(jq -r '.source.lock_name // ""' < $payload)"
+bosh_lock="$(jq -r '.source.bosh_lock // ""' < $payload)"
 key="$(jq -r '.params.key // ""' < $payload)"
 locked_by="$(jq -r '.params.locked_by // ""' < $payload)"
 operation="$(jq -r '.params.lock_op // ""' < $payload)"
@@ -19,8 +20,13 @@ if [[ -z "$uri" ]]; then
   exit 1
 fi
 
-if [[ -z "${lock}" ]]; then
-  echo >&2 "invalid payload (missing lock_name)"
+if [[ -z "${lock}" && -z "${bosh_lock}" ]]; then
+  echo >&2 "invalid payload (neither lock_name nor bosh_lock were specified - need one)"
+  cat $payload >&2
+  exit 1
+fi
+if [[ -n "${lock}" && -n "${bosh_lock}" ]]; then
+  echo >&2 "invalid payload (both lock_name and bosh_lock were specified - need only one)"
   cat $payload >&2
   exit 1
 fi

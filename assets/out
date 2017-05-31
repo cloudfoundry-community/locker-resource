@@ -9,7 +9,13 @@ src=$1
 
 source $(dirname $0)/common.sh
 
-if [[ -z "$lock" ]]; then
+if [[ -z "${lock}" ]]; then
+	echo "Determining lock name based off of BOSH info: ${bosh_lock}/info"
+	lock=$(curl -k ${bosh_lock}/info | jq -r '.name')
+	echo "Using ${lock} for lock name"
+fi
+
+if [[ -z "$key" ]]; then
 	echo >&2 "invalid payload (missing key)"
 fi
 
