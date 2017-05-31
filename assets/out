@@ -11,7 +11,7 @@ source $(dirname $0)/common.sh
 
 if [[ -z "${lock}" ]]; then
 	echo "Determining lock name based off of BOSH info: ${bosh_lock}/info"
-	lock=$(curl -k ${bosh_lock}/info | jq -r '.name' | perl -p -e 'chomp; s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;')
+	lock=$(curl -sSf -k ${bosh_lock}/info | jq -r '.name' | perl -p -e 'chomp; s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;')
 	if [[ -z "${lock}" ]]; then
 		echo >&2 "ERROR: Could not determine BOSH director name to use as lock name"
 		exit 1
